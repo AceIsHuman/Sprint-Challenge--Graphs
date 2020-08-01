@@ -32,16 +32,23 @@ class Graph:
   def get_path_to_unvisited(self, room_id):
     q = Queue()
     q.enqueue(([room_id], []))
+    visited = set()
+
     while q.size():
       rooms, path = q.dequeue()
       room = rooms[-1]
-      exits = self.rooms[room]
-      for (direction, exit) in exits.items():
-        if exit == '?':
-          return path 
-        exit_path = path + [direction]
-        exit_rooms = rooms + [exit]
-        q.enqueue((exit_rooms, exit_path))
+
+      if room not in visited:
+        visited.add(room)
+        exits = self.rooms[room]
+        for (direction, exit) in exits.items():
+          if exit == '?':
+            return path
+          elif exit in visited:
+            continue
+          exit_path = path + [direction]
+          exit_rooms = rooms + [exit]
+          q.enqueue((exit_rooms, exit_path))
 
 
 def reverse_direction(direction):
