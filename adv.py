@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from world import World
+from roomgraph import Graph
 
 import random
 from ast import literal_eval
@@ -26,8 +27,40 @@ world.print_rooms()
 player = Player(world.starting_room)
 
 # Fill this out with directions to walk
+def get_unvisited(room, visited):
+    exits = room.get_exits()
+    return [e for e in exits if visited[room.id][e] == '?']
+
+def generate_path(p):
+    visited = Graph()
+    path = []
+
+    while len(visited.rooms) != len(room_graph):
+        curr_room = p.current_room
+        if curr_room.id not in visited.rooms:
+            visited.add_room(curr_room)
+
+        unvisited_exits = get_unvisited(curr_room, visited.rooms)
+
+        if len(unvisited_exits) == 0:
+            directions = visited.get_path_to_unvisited(curr_room.id)
+            for direction in directions:
+                p.travel(direction)
+                path.append(direction)
+
+        else:
+            direction = random.choice(unvisited_exits)
+            p.travel(direction)
+            next_room = p.current_room
+
+            path.append(direction)
+            visited.connect_rooms(curr_room, next_room, direction)
+
+    return path
+
+
 # traversal_path = ['n', 'n']
-traversal_path = []
+traversal_path = generate_path(player)
 
 
 
