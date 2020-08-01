@@ -22,9 +22,12 @@ class Graph:
     for exit in exits:
       self.rooms[room.id][exit] = '?'
 
-  def connect_rooms(self, room_id_1, room_id_2, direction):
-    self.rooms[room_id_1][direction] = room_id_2
-    self.rooms[room_id_2][reverse_direction(direction)] = room_id_1
+  def connect_rooms(self, room_1, room_2, direction):
+    self.rooms[room_1.id][direction] = room_2.id
+    if room_2.id not in self.rooms:
+      self.add_room(room_2)
+
+    self.rooms[room_2.id][reverse_direction(direction)] = room_1.id
 
   def get_path_to_unvisited(self, room):
     q = Queue()
