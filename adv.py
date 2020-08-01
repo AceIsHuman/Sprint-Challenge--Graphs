@@ -40,7 +40,7 @@ def reverse_direction(direction):
 
 def get_unvisited(room, visited):
     exits = room.get_exits()
-    return [e for e in exits if e not in visited[room.id]]
+    return [e for e in exits if visited[room.id][e] == '?']
 
 def add_to_visited(room_in, next_room, direction, visited):
     visited[room_in.id][direction] = next_room.id
