@@ -16,10 +16,11 @@ class Graph:
   def __init__(self):
     self.rooms = {}
 
-  def add_room(self, room_id, exits):
-    self.rooms[room_id] = {}
+  def add_room(self, room):
+    self.rooms[room.id] = {}
+    exits = room.get_exits()
     for exit in exits:
-      self.rooms[room_id][exit] = '?'
+      self.rooms[room.id][exit] = '?'
 
   def connect_rooms(self, room_id_1, room_id_2, direction):
     self.rooms[room_id_1][direction] = room_id_2
