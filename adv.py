@@ -1,6 +1,7 @@
 from room import Room
 from player import Player
 from world import World
+from roomgraph import Graph
 
 import random
 from ast import literal_eval
@@ -26,79 +27,34 @@ world.print_rooms()
 player = Player(world.starting_room)
 
 # Fill this out with directions to walk
-def reverse_direction(direction):
-    if direction == "n":
-        return "s"
-    elif direction == "s":
-        return "n"
-    elif direction == "e":
-        return "w"
-    elif direction == "w":
-        return "e"
-    else:
-        return None
-
 def get_unvisited(room, visited):
     exits = room.get_exits()
     return [e for e in exits if visited[room.id][e] == '?']
 
-def add_to_visited(room_in, next_room, direction, visited):
-    visited[room_in.id][direction] = next_room.id
-
-    if next_room.id not in visited:
-        visited[next_room.id] = {}
-
-    visited[next_room.id][reverse_direction(direction)] = room_in.id
-
-def backtrack(path, player, visited, incompleted_rooms):
-    path_copy = path.copy()
-    unvisited = get_unvisited(player.current_room, visited)
-
-    while len(unvisited) == 0:
-        direction = reverse_direction(path_copy.pop())
-
-        player.travel(direction)
-        path.append(direction)
-        room = player.current_room
-
-        unvisited = get_unvisited(room, visited)
-        if len(unvisited) == 0:
-            exits = room.get_exits()
-            for exit in exits:
-                next_room = visited[room.id][exit]
-                if next_room in incompleted_rooms:
-                    player.travel(exit)
-                    path.append(exit)
-                    return
-
 def generate_path(p):
-    visited = {}
-    incompleted_rooms = {}
+    visited = Graph()
     path = []
 
-    while len(visited) != len(room_graph):
+    while len(visited.rooms) != len(room_graph):
         curr_room = p.current_room
-        if curr_room.id not in visited:
-            visited[curr_room.id] = {}
+        if curr_room.id not in visited.rooms:
+            visited.add_room(curr_room)
 
-        unvisited_exits = get_unvisited(curr_room, visited)
+        unvisited_exits = get_unvisited(curr_room, visited.rooms)
 
         if len(unvisited_exits) == 0:
-            backtrack(path, p, visited, incompleted_rooms)
-            if curr_room.id in incompleted_rooms:
-                del incompleted_rooms[curr_room.id]
-        else:
-            if (len(unvisited_exits) == 1) and (curr_room.id in incompleted_rooms):
-                del incompleted_rooms[curr_room.id]
-            elif len(unvisited_exits) > 1:
-                incompleted_rooms[curr_room.id] = len(unvisited_exits)
+            directions = visited.get_path_to_unvisited(curr_room.id)
+            for direction in directions:
+                p.travel(direction)
+                path.append(direction)
 
+        else:
             direction = random.choice(unvisited_exits)
             p.travel(direction)
             next_room = p.current_room
 
             path.append(direction)
-            add_to_visited(curr_room, next_room, direction, visited)
+            visited.connect_rooms(curr_room, next_room, direction)
 
     return path
 
